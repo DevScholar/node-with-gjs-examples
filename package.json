@@ -1,0 +1,10 @@
+{
+  "name": "node-with-gjs-examples",
+  "version": "0.0.0",
+  "description": "Examples for node-with-gjs",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "@devscholar/node-with-gjs": "^0.0.1"
+  }
+}
