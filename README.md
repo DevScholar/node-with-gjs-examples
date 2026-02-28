@@ -4,7 +4,7 @@ Examples demonstrating how to use the `node-with-gjs` library to build GTK appli
 
 ## Prerequisites
 
-- Node.js 18+ (or Bun, or Deno)
+- Node.js v22.22.0+ (or Bun, or Deno)
 - GJS (GNOME JavaScript) installed on your system
 - GTK 4.0 and related libraries
 
