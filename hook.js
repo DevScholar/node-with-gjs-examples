@@ -1,4 +1,6 @@
-// hook.js - Node.js module loader hook for gi:// protocol
+// hook.js - Node.js module loader hook for gi:// protocol and TypeScript
+import * as esbuild from 'esbuild';
+
 export async function resolve(specifier, context, nextResolve) {
     if (specifier.startsWith('gi://')) {
         return {
@@ -7,12 +9,16 @@ export async function resolve(specifier, context, nextResolve) {
             format: 'module'
         };
     }
+    
+    if (specifier.endsWith('.ts') || specifier.endsWith('.tsx')) {
+        return nextResolve(specifier, context);
+    }
+    
     return nextResolve(specifier, context);
 }
 
 export async function load(url, context, nextLoad) {
     if (url.startsWith('gi://')) {
-        // Safely parse 'gi://Gtk?version=4.0'
         const bareUrl = url.replace('gi://', '');
         const [namespacePart, queryPart] = bareUrl.split('?');
         
@@ -40,5 +46,22 @@ export async function load(url, context, nextLoad) {
             source: source
         };
     }
+    
+    if (url.endsWith('.ts') || url.endsWith('.tsx')) {
+        const result = await nextLoad(url, context);
+        if (result.source) {
+            const transformed = await esbuild.transform(result.source, {
+                format: 'esm',
+                platform: 'node',
+                target: 'node22',
+                loader: url.endsWith('.tsx') ? 'tsx' : 'ts'
+            });
+            return {
+                format: 'module',
+                source: transformed.code
+            };
+        }
+    }
+    
     return nextLoad(url, context);
 }

@@ -67,7 +67,6 @@ import('fs').then(fs => {
         return spawn(process.execPath, [
             '--no-warnings', 
             '--experimental-loader', hookUrl,
-            '--experimental-transform-types', 
             targetScript
         ], {
             stdio: 'inherit',
