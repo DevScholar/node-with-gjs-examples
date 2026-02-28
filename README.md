@@ -14,8 +14,6 @@ Examples demonstrating how to use the `node-with-gjs` library to build GTK appli
 npm install
 ```
 
-This will install the `@devscholar/node-with-gjs` package as a local dependency from `../node-with-gjs`.
-
 ## Import Syntax
 
 This project supports two import syntaxes for GObject Introspection (GI) modules:
