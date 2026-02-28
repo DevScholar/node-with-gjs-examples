@@ -92,6 +92,7 @@ import('fs').then(fs => {
         return spawn('deno', [
             'run',
             '--allow-all',
+            '--unstable',
             targetScript
         ], {
             stdio: 'inherit',

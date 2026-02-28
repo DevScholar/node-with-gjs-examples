@@ -32,7 +32,7 @@ const app = new Gtk.Application({ application_id: 'org.example.app' });
 **Compatibility:**
 - ✅ Node.js (via module loader hook)
 - ✅ Bun (via plugin)
-- ❌ Deno (not supported)
+- ✅ Deno (via Module.registerHooks, requires --unstable)
 
 ### 2. Legacy `imports.gi` Syntax
 
@@ -56,7 +56,7 @@ const app = new Gtk.Application({ application_id: 'org.example.app' });
 
 Use `node start.js` followed by the example path. You can optionally specify the runtime with `--runtime=<runtime>` (default is `node`).
 
-Available runtimes: `node`, `bun`, `deno` (deno only works with legacy `imports.gi` syntax)
+Available runtimes: `node`, `bun`, `deno` (all support both `gi://` and `imports.gi` syntax)
 
 ### GTK Examples
 
@@ -101,8 +101,8 @@ node start.js src/gtk/legacy-imports-counter/counter.ts
 # With Bun
 node start.js src/gtk/legacy-imports-counter/counter.ts --runtime=bun
 
-# With Deno (only legacy syntax works)
-node start.js src/gtk/legacy-imports-counter/counter.ts --runtime=deno
+# With Deno
+node start.js src/gtk/counter/counter.ts --runtime=deno
 ```
 
 ## Examples
@@ -123,10 +123,10 @@ node start.js src/gtk/legacy-imports-counter/counter.ts --runtime=deno
 |---------|------------------|---------------------|
 | Node.js | ✅ Yes (via hook) | ✅ Yes |
 | Bun | ✅ Yes (via plugin) | ✅ Yes |
-| Deno | ❌ No | ✅ Yes |
+| Deno | ✅ Yes (via Module.registerHooks) | ✅ Yes |
 
 ## Notes
 
 - The `gi://` protocol is the recommended approach for new projects as it matches native GJS syntax
-- Deno does not support custom module protocols, so you must use the legacy `imports.gi` syntax
+- Deno supports `gi://` protocol via the Node.js Customization Hooks API (`Module.registerHooks`), requires `--unstable` flag
 - All examples except `legacy-imports-counter` use the modern `gi://` protocol

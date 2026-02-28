@@ -1,7 +1,7 @@
-// gi-loader.ts
+// node-gi-loaders.ts
 // Universal GI namespace loader for Node.js, Bun, and Deno
 // Usage:
-//   import { imports } from './gi-loader.ts';
+//   import { imports } from './loaders/node-gi-loaders.ts';
 //   const { Gtk, Gdk } = imports.gi;
 //
 //   // Or specify versions:

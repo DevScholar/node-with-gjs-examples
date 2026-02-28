@@ -5,7 +5,7 @@
   "private": true,
   "type": "module",
   "dependencies": {
-    "@devscholar/node-with-gjs": "latest"
+    "@devscholar/node-with-gjs": "file:../node-with-gjs"
   },
   "engines": {
     "node": ">=22.22.0"
