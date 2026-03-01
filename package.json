@@ -9,7 +9,7 @@
     "esbuild": "^0.25.0"
   },
   "engines": {
-    "node": ">=22.22.0"
+    "node": ">=18.0.0"
   },
   "devDependencies": {
     "@girs/adw-1": "^1.9.0-4.0.0-beta.38",

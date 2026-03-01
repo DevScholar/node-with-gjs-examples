@@ -4,7 +4,7 @@ Examples demonstrating how to use the `node-with-gjs` library to build GTK appli
 
 ## Prerequisites
 
-- Node.js v22.22.0+ (or Bun, or Deno)
+- Node.js 18+ (LTS version recommended, or Bun, or Deno)
 - GJS (GNOME JavaScript) installed on your system
 - GTK 4.0 and related libraries
 
@@ -19,46 +19,6 @@ npm run build
 # Install dependencies for examples
 cd ../node-with-gjs-examples
 npm install
-```
-
-## How It Works
-
-This project uses **esbuild with a custom plugin** to transform `gi://` imports at build time:
-
-```typescript
-// Source code (TypeScript)
-import Gtk from 'gi://Gtk?version=4.0';
-
-// ↓ Transformed at build time ↓
-
-// JavaScript (output)
-import { imports } from '@devscholar/node-with-gjs';
-imports.gi.versions["Gtk"] = "4.0";
-var Gtk = imports.gi.Gtk;
-```
-
-This approach provides better compatibility and doesn't require runtime hooks.
-
-## Import Syntax
-
-### 1. Modern `gi://` Protocol (Recommended)
-
-```typescript
-import Gtk from 'gi://Gtk?version=4.0';
-import Adw from 'gi://Adw?version=1';
-
-const app = new Gtk.Application({ application_id: 'org.example.app' });
-```
-
-### 2. Legacy `imports.gi` Syntax
-
-```typescript
-import { imports } from '@devscholar/node-with-gjs';
-
-imports.gi.versions.Gtk = '4.0';
-const { Gtk } = imports.gi;
-
-const app = new Gtk.Application({ application_id: 'org.example.app' });
 ```
 
 ## Running Examples
@@ -133,6 +93,46 @@ node start.js src/gtk/counter/counter.ts --runtime=deno
 | Node.js | ✅ Yes (build-time transform) | ✅ Yes |
 | Bun | ✅ Yes (build-time transform) | ✅ Yes |
 | Deno | ✅ Yes (build-time transform) | ✅ Yes |
+
+## How It Works
+
+This project uses **esbuild with a custom plugin** to transform `gi://` imports at build time:
+
+```typescript
+// Source code (TypeScript)
+import Gtk from 'gi://Gtk?version=4.0';
+
+// ↓ Transformed at build time ↓
+
+// JavaScript (output)
+import { imports } from '@devscholar/node-with-gjs';
+imports.gi.versions["Gtk"] = "4.0";
+var Gtk = imports.gi.Gtk;
+```
+
+This approach provides better compatibility and doesn't require runtime hooks.
+
+## Import Syntax
+
+### 1. Modern `gi://` Protocol (Recommended)
+
+```typescript
+import Gtk from 'gi://Gtk?version=4.0';
+import Adw from 'gi://Adw?version=1';
+
+const app = new Gtk.Application({ application_id: 'org.example.app' });
+```
+
+### 2. Legacy `imports.gi` Syntax
+
+```typescript
+import { imports } from '@devscholar/node-with-gjs';
+
+imports.gi.versions.Gtk = '4.0';
+const { Gtk } = imports.gi;
+
+const app = new Gtk.Application({ application_id: 'org.example.app' });
+```
 
 ## Notes
 
