@@ -11,16 +11,37 @@ Examples demonstrating how to use the `node-with-gjs` library to build GTK appli
 ## Installation
 
 ```bash
+# Install dependencies for main library
+cd node-with-gjs
+npm install
+npm run build
+
+# Install dependencies for examples
+cd ../node-with-gjs-examples
 npm install
 ```
 
+## How It Works
+
+This project uses **esbuild with a custom plugin** to transform `gi://` imports at build time:
+
+```typescript
+// Source code (TypeScript)
+import Gtk from 'gi://Gtk?version=4.0';
+
+// ↓ Transformed at build time ↓
+
+// JavaScript (output)
+import { imports } from '@devscholar/node-with-gjs';
+imports.gi.versions["Gtk"] = "4.0";
+var Gtk = imports.gi.Gtk;
+```
+
+This approach provides better compatibility and doesn't require runtime hooks.
+
 ## Import Syntax
 
-This project supports two import syntaxes for GObject Introspection (GI) modules:
-
 ### 1. Modern `gi://` Protocol (Recommended)
-
-This is the standard GJS import syntax, compatible with native GJS:
 
 ```typescript
 import Gtk from 'gi://Gtk?version=4.0';
@@ -29,14 +50,7 @@ import Adw from 'gi://Adw?version=1';
 const app = new Gtk.Application({ application_id: 'org.example.app' });
 ```
 
-**Compatibility:**
-- ✅ Node.js (via module loader hook)
-- ✅ Bun (via plugin)
-- ✅ Deno (via Module.registerHooks, requires --unstable)
-
 ### 2. Legacy `imports.gi` Syntax
-
-Traditional GJS-style imports for backward compatibility:
 
 ```typescript
 import { imports } from '@devscholar/node-with-gjs';
@@ -47,16 +61,11 @@ const { Gtk } = imports.gi;
 const app = new Gtk.Application({ application_id: 'org.example.app' });
 ```
 
-**Compatibility:**
-- ✅ Node.js
-- ✅ Bun
-- ✅ Deno
-
 ## Running Examples
 
 Use `node start.js` followed by the example path. You can optionally specify the runtime with `--runtime=<runtime>` (default is `node`).
 
-Available runtimes: `node`, `bun`, `deno` (all support both `gi://` and `imports.gi` syntax)
+Available runtimes: `node`, `bun`, `deno`
 
 ### GTK Examples
 
@@ -95,7 +104,7 @@ node start.js src/console/console-input/console-input.ts
 ### Legacy Syntax Example
 
 ```bash
-# GTK4 Counter using imports.gi syntax (works with all runtimes)
+# GTK4 Counter using imports.gi syntax
 node start.js src/gtk/legacy-imports-counter/counter.ts
 
 # With Bun
@@ -121,12 +130,12 @@ node start.js src/gtk/counter/counter.ts --runtime=deno
 
 | Runtime | `gi://` Protocol | `imports.gi` Syntax |
 |---------|------------------|---------------------|
-| Node.js | ✅ Yes (via hook) | ✅ Yes |
-| Bun | ✅ Yes (via plugin) | ✅ Yes |
-| Deno | ✅ Yes (via Module.registerHooks) | ✅ Yes |
+| Node.js | ✅ Yes (build-time transform) | ✅ Yes |
+| Bun | ✅ Yes (build-time transform) | ✅ Yes |
+| Deno | ✅ Yes (build-time transform) | ✅ Yes |
 
 ## Notes
 
-- The `gi://` protocol is the recommended approach for new projects as it matches native GJS syntax
-- Deno supports `gi://` protocol via the Node.js Customization Hooks API (`Module.registerHooks`), requires `--unstable` flag
+- The `gi://` protocol is transformed at build time via esbuild plugin - no runtime hooks needed
 - All examples except `legacy-imports-counter` use the modern `gi://` protocol
+- Built files are output to the `dist/` directory

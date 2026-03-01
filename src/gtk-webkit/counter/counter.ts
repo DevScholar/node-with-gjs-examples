@@ -2,11 +2,13 @@ import Gtk from 'gi://Gtk?version=4.0';
 import WebKit from 'gi://WebKit?version=6.0';
 import * as path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { env } from 'node:process';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-
-console.log('--- GTK4 WebKit Counter ---');
+const projectRoot = path.join(__dirname, '..', '..', '..');
+const htmlPath = path.join(projectRoot, 'src', 'gtk-webkit', 'counter', 'counter.html');
+const htmlUri = 'file://' + htmlPath.replace(/\\/g, '/');
 
 const app = new Gtk.Application({ application_id: 'org.gtk.webkitcounter' });
 
@@ -31,9 +33,6 @@ app.connect('activate', () => {
     toolbar.set_margin_end(5);
     toolbar.set_margin_top(5);
     toolbar.set_margin_bottom(5);
-
-    const htmlPath = path.join(__dirname, 'counter.html');
-    const htmlUri = 'file://' + htmlPath;
 
     const backButton = new Gtk.Button({ label: '← Back' });
     const forwardButton = new Gtk.Button({ label: 'Forward →' });

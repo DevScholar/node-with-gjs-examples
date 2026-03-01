@@ -1,101 +1,144 @@
-// start.js - Universal starter for Node.js, Bun, and Deno
+// start.js - Universal starter for Node.js, Bun, and Deno with esbuild
 import { spawn } from 'child_process';
 import path from 'path';
+import fs from 'fs';
 import { fileURLToPath } from 'url';
-import('fs').then(fs => {
-    const args = process.argv.slice(2);
+import * as esbuild from 'esbuild';
+import { giPlugin } from './gi-plugin.js';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+const args = process.argv.slice(2);
+
+if (args.length === 0) {
+    console.error('Usage: node start.js <script.ts> --runtime=node|bun|deno');
+    console.error('       bun start.js <script.ts> --runtime=node|bun|deno');
+    console.error('       deno run start.js <script.ts> --runtime=node|bun|deno');
+    process.exit(1);
+}
+
+let runtime = null;
+let targetScript = null;
+
+for (let i = 0; i < args.length; i++) {
+    if (args[i] === '--runtime' && args[i + 1]) {
+        runtime = args[i + 1].toLowerCase();
+        i++;
+    } else if (!args[i].startsWith('--')) {
+        targetScript = args[i];
+    }
+}
+
+if (!targetScript) {
+    console.error('Error: No script specified');
+    process.exit(1);
+}
+
+targetScript = path.resolve(targetScript);
+
+if (!fs.existsSync(targetScript)) {
+    console.error(`Error: File not found: ${targetScript}`);
+    process.exit(1);
+}
+
+if (!runtime) {
+    runtime = 'node';
+}
+
+const validRuntimes = ['node', 'bun', 'deno'];
+if (!validRuntimes.includes(runtime)) {
+    console.error(`Error: Invalid runtime "${runtime}". Must be one of: ${validRuntimes.join(', ')}`);
+    process.exit(1);
+}
+
+async function buildAndRun() {
+    console.log('Building TypeScript...');
     
-    if (args.length === 0) {
-        console.error('Usage: node start.js <script.ts> --runtime=node|bun|deno');
-        console.error('       bun start.js <script.ts> --runtime=node|bun|deno');
-        console.error('       deno run start.js <script.ts> --runtime=node|bun|deno');
-        process.exit(1);
+    const ext = path.extname(targetScript);
+    const relativePath = path.relative(path.join(__dirname, 'src'), targetScript);
+    const outfile = path.join(__dirname, 'dist', relativePath.replace(/\.ts$/, '.js'));
+    
+    // Ensure output directory exists
+    const outDir = path.dirname(outfile);
+    if (!fs.existsSync(outDir)) {
+        fs.mkdirSync(outDir, { recursive: true });
     }
-
-    let runtime = null;
-    let targetScript = null;
-
-    for (let i = 0; i < args.length; i++) {
-        if (args[i] === '--runtime' && args[i + 1]) {
-            runtime = args[i + 1].toLowerCase();
-            i++;
-        } else if (!args[i].startsWith('--')) {
-            targetScript = args[i];
-        }
-    }
-
-    if (!targetScript) {
-        console.error('Error: No script specified');
-        process.exit(1);
-    }
-
-    targetScript = path.resolve(targetScript);
-    const hookUrl = new URL('./hook.js', import.meta.url).href;
-
-    if (!runtime) {
-        runtime = 'node';
-    }
-
-    const validRuntimes = ['node', 'bun', 'deno'];
-    if (!validRuntimes.includes(runtime)) {
-        console.error(`Error: Invalid runtime "${runtime}". Must be one of: ${validRuntimes.join(', ')}`);
-        process.exit(1);
-    }
-
+    
+    await esbuild.build({
+        entryPoints: [targetScript],
+        bundle: true,
+        outfile: outfile,
+        format: 'esm',
+        platform: 'node',
+        target: 'node18',
+        plugins: [giPlugin()],
+        external: ['@devscholar/node-with-gjs'],
+        sourcemap: true,
+        logLevel: 'info'
+    });
+    
+    console.log('Build complete.');
     console.log(`Starting ${runtime.charAt(0).toUpperCase() + runtime.slice(1)}-GJS execution context...`);
-
+    
     let proc;
-
+    
     switch (runtime) {
         case 'bun':
-            proc = spawnBun(targetScript);
+            proc = spawnBun(outfile);
             break;
         case 'deno':
-            proc = spawnDeno(targetScript);
+            proc = spawnDeno(outfile);
             break;
         case 'node':
         default:
-            proc = spawnNode(targetScript, hookUrl);
+            proc = spawnNode(outfile);
             break;
     }
-
+    
     proc.on('exit', (code) => {
         process.exit(code || 0);
     });
+    
+    proc.on('error', (err) => {
+        console.error('Failed to start:', err.message);
+        process.exit(1);
+    });
+}
 
-    function spawnNode(targetScript, hookUrl) {
-        return spawn(process.execPath, [
-            '--no-warnings', 
-            '--experimental-loader', hookUrl,
-            targetScript
-        ], {
-            stdio: 'inherit',
-            env: process.env
-        });
-    }
+function spawnNode(targetScript) {
+    return spawn(process.execPath, [
+        '--no-warnings', 
+        targetScript
+    ], {
+        stdio: 'inherit',
+        env: process.env
+    });
+}
 
-    function spawnBun(targetScript) {
-        const pluginPath = path.resolve('./bun-gi-plugin.ts');
-        
-        return spawn('bun', [
-            '--preload', pluginPath,
-            'run',
-            targetScript
-        ], {
-            stdio: 'inherit',
-            env: process.env
-        });
-    }
+function spawnBun(targetScript) {
+    return spawn('bun', [
+        'run',
+        targetScript
+    ], {
+        stdio: 'inherit',
+        env: process.env
+    });
+}
 
-    function spawnDeno(targetScript) {
-        return spawn('deno', [
-            'run',
-            '--allow-all',
-            '--unstable',
-            targetScript
-        ], {
-            stdio: 'inherit',
-            env: process.env
-        });
-    }
+function spawnDeno(targetScript) {
+    return spawn('deno', [
+        'run',
+        '--allow-all',
+        '--unstable',
+        targetScript
+    ], {
+        stdio: 'inherit',
+        env: process.env
+    });
+}
+
+buildAndRun().catch((err) => {
+    console.error('Error:', err.message);
+    process.exit(1);
 });
