@@ -27,6 +27,17 @@ Use `node start.js` followed by the example path. You can optionally specify the
 
 Available runtimes: `node`, `bun`, `deno`
 
+### Running with Deno or Bun Directly
+
+If you want to run `start.js` directly with Deno or Bun instead of Node.js:
+
+```bash
+deno run --allow-all start.js src/gtk/counter/counter.ts
+bun start.js src/gtk/counter/counter.ts
+```
+
+Note: The `--runtime=deno` and `--runtime=bun` options above use Node.js to run `start.js`, which then spawns the specified runtime to execute the compiled JavaScript. If you want to run `start.js` itself with Deno/Bun, use the commands above instead.
+
 ### GTK Examples
 
 ```bash
