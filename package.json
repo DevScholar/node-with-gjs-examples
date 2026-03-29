@@ -5,7 +5,7 @@
   "private": true,
   "type": "module",
   "dependencies": {
-    "@devscholar/node-with-gjs": "latest",
+    "@devscholar/node-with-gjs": "file:../node-with-gjs",
     "esbuild": "^0.25.0"
   },
   "engines": {
@@ -24,6 +24,7 @@
     "gtk-drag-box": "node start.js src/gtk/drag-box/drag-box.ts",
     "adwaita-counter": "node start.js src/adwaita/counter/counter.ts",
     "console-input": "node start.js src/console/console-input/console-input.ts",
-    "await-delay": "node start.js src/console/await-delay/await-delay.ts"
+    "await-delay": "node start.js src/console/await-delay/await-delay.ts",
+    "gtk-blocking-dialog": "node start.js src/gtk/blocking-dialog/blocking-dialog.ts"
   }
 }

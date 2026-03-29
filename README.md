@@ -46,6 +46,8 @@ node start.js src/gtk/counter/counter.ts
 
 # GTK4 Draggable Box
 node start.js src/gtk/drag-box/drag-box.ts
+
+node start.js src/gtk/blocking-dialog/blocking-dialog.ts
 ```
 
 ### WebKit Example
