@@ -14,11 +14,6 @@ app.connect('activate', () => {
         default_height: 300
     });
 
-    window.connect('close-request', () => {
-        app.quit();
-        return false;
-    });
-
     const box = new Gtk.Box({
         orientation: Gtk.Orientation.VERTICAL,
         spacing: 10,

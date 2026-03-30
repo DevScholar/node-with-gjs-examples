@@ -10,7 +10,7 @@
     "noEmit": false,
     "outDir": "./dist",
     "rootDir": "./src",
-    "types": ["@girs/gjs", "node"]
+    "types": ["@girs/gjs"]
   },
   "include": ["src/**/*", "types/**/*"]
 }
