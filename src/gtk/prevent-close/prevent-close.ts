@@ -42,10 +42,15 @@ app.connect('activate', () => {
         css_classes: ['destructive-action'],
     });
 
-    // Clicking the dedicated Quit button allows the window to close.
+    let allowClose = false;
+
+    // Clicking the dedicated Quit button sets the flag, then closes normally
+    // through the window — so close-request still fires, sees allowClose=true,
+    // and returns false to let GTK proceed.
     quitButton.connect('clicked', () => {
         console.log('Quit button clicked — closing window.');
-        app.quit();
+        allowClose = true;
+        window.close();
     });
 
     // close-request: return true to block the × button, false to allow close.
@@ -53,9 +58,12 @@ app.connect('activate', () => {
     // Because this is a sync callback, the return value reaches GTK immediately
     // and proxy calls like statusLabel.set_label() work inside the handler.
     window.connect('close-request', () => {
-        console.log('close-request intercepted — window close blocked.');
-        statusLabel.set_label('Close blocked!\nUse the "Quit" button.');
-        return true; // true = prevent close
+        if (!allowClose) {
+            console.log('close-request intercepted — window close blocked.');
+            statusLabel.set_label('Close blocked!\nUse the "Quit" button.');
+            return true; // true = prevent close
+        }
+        return false; // allow close
     });
 
     box.append(statusLabel);
