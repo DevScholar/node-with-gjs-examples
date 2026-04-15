@@ -25,6 +25,7 @@
     "adwaita-counter": "node start.js src/adwaita/counter/counter.ts",
     "console-input": "node start.js src/console/console-input/console-input.ts",
     "await-delay": "node start.js src/console/await-delay/await-delay.ts",
-    "gtk-blocking-dialog": "node start.js src/gtk/blocking-dialog/blocking-dialog.ts"
+    "gtk-blocking-dialog": "node start.js src/gtk/blocking-dialog/blocking-dialog.ts",
+    "gnome-shell-bounds": "node start.js src/gnome-shell/bounds/bounds.ts"
   }
 }

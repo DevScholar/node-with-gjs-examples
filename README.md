@@ -38,6 +38,17 @@ bun start.js src/gtk/counter/counter.ts
 
 Note: The `--runtime=deno` and `--runtime=bun` options above use Node.js to run `start.js`, which then spawns the specified runtime to execute the compiled JavaScript. If you want to run `start.js` itself with Deno/Bun, use the commands above instead.
 
+### GNOME Shell Examples
+
+These examples require a **native GNOME Shell** environment (real Linux or VMware VM). They do not work in WSL.
+Requires `unsafe_mode` enabled once per session via LookingGlass (`Alt+F2 → lg`).
+See [docs/run-on-vmware-ubuntu.md](docs/run-on-vmware-ubuntu.md) for setup instructions.
+
+```bash
+# Window bounds control via D-Bus + Meta.Window (requires GNOME Shell)
+node start.js src/gnome-shell/bounds/bounds.ts
+```
+
 ### GTK Examples
 
 ```bash
@@ -86,13 +97,14 @@ node start.js src/gtk/legacy-imports-counter/counter.ts
 node start.js src/gtk/legacy-imports-counter/counter.ts --runtime=bun
 
 # With Deno
-node start.js src/gtk/counter/counter.ts --runtime=deno
+node start.js src/gtk/legacy-imports-counter/counter.ts --runtime=deno
 ```
 
 ## Examples
 
 | Example | Path | Description | Import Syntax |
 |---------|------|-------------|---------------|
+| **GNOME Shell Bounds** | `src/gnome-shell/bounds/bounds.ts` | Control window position/size via GNOME Shell D-Bus (requires native GNOME) | `gi://` |
 | GTK Counter | `src/gtk/counter/counter.ts` | Simple GTK4 counter application | `gi://` |
 | GTK Drag Box | `src/gtk/drag-box/drag-box.ts` | Draggable square with Cairo graphics | `gi://` |
 | Legacy Counter | `src/gtk/legacy-imports-counter/counter.ts` | GTK4 counter using legacy `imports.gi` | `imports.gi` |
