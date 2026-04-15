@@ -2,7 +2,7 @@
 
 This guide assumes you already have a VMware Ubuntu VM set up with a shared folder from your Windows host mounted and accessible inside the VM.
 
-> **Why a VM?** The GNOME Shell bounds example controls window position and size by injecting JavaScript into the `gnome-shell` process via D-Bus. This only works on a native GNOME desktop. WSL uses a different compositor (Weston/WSLg) and has no `gnome-shell` process.
+> **Why a VM?** The examples run on a native GNOME desktop. WSL uses a different compositor (Weston/WSLg) and may not support all features.
 
 ---
 
@@ -51,67 +51,12 @@ sudo apt install -y gjs libgtk-4-dev
 
 ---
 
-## Step 4 — Enable unsafe_mode in GNOME Shell (once per session)
+## Step 4 — Run the Examples
 
-`org.gnome.Shell.Eval` requires `unsafe_mode` to be on. In GNOME 44 and earlier this was a D-Bus property that could be set programmatically, but **it was removed in GNOME 45+**. It must now be set manually via LookingGlass.
-
-First, enable the LookingGlass tool (only needed once, persists across reboots):
+All GTK examples work without GNOME Shell and can be run directly:
 
 ```bash
-gsettings set org.gnome.shell development-tools true
-```
-
-Then, each time you start a new desktop session:
-
-1. Press `Alt+F2` to open the Run Dialog
-2. Type `lg` and press Enter — LookingGlass opens
-3. In the input box at the bottom, type and press Enter:
-   ```javascript
-   global.context.unsafe_mode = true
-   ```
-4. Close LookingGlass by typing in the input box:
-   ```javascript
-   Main.lookingGlass.close()
-   ```
-   > LookingGlass has no title bar or taskbar button. `Escape` does not close it. This is the only reliable way.
-
-Verify it works:
-
-```bash
-gdbus call --session --dest org.gnome.Shell --object-path /org/gnome/Shell \
-  --method org.gnome.Shell.Eval "1+1"
-# Expected: (true, '2')
-```
-
----
-
-## Step 5 — Run the Bounds Example
-
-```bash
-cd ~/node-with-gjs-examples
-node start.js src/gnome-shell/bounds/bounds.ts
-```
-
-Once the window appears:
-
-| Control | Description |
-|---------|-------------|
-| **Target window title** | Partial title match of the window to control (e.g. `Files`, `Terminal`) |
-| **X / Y** | Target position in pixels |
-| **W / H** | Target size in pixels |
-| **Apply Bounds** | Move and resize immediately (single operation) |
-| **Bounce (batch)** | Move through 5 positions with `unsafe_mode` toggled only once |
-
----
-
-## Other Examples
-
-All other GTK examples work without GNOME Shell and can be run directly:
-
-```bash
-node start.js src/gtk/counter/counter.ts
-node start.js src/gtk/drag-box/drag-box.ts
-node start.js src/adwaita/counter/counter.ts
+node start.js <example-name.ts>
 ```
 
 ---
@@ -132,11 +77,4 @@ You must be running inside a GNOME desktop session (not a bare TTY). Check:
 
 ```bash
 echo $DESKTOP_SESSION   # should print ubuntu or gnome
-gdbus call --session --dest org.gnome.Shell --object-path /org/gnome/Shell \
-  --method org.gnome.Shell.Eval "1+1"
-# should return (true, '2')
 ```
-
-**Window moves off-screen**
-
-VMware VMs often have small default resolutions. Use modest coordinates (e.g. X=50, Y=50) or increase the VM display resolution in VMware settings.
