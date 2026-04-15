@@ -179,9 +179,11 @@ app.connect('activate', () => {
     // Bounce moves the window through 5 positions using a single beginBatch/endBatch,
     // so unsafe_mode is only toggled once regardless of how many moves are made.
     const bounceBtn = new Gtk.Button({ label: 'Bounce (batch)' });
+    const helpBtn   = new Gtk.Button({ label: 'Help' });
 
     btnRow.append(applyBtn);
     btnRow.append(bounceBtn);
+    btnRow.append(helpBtn);
     vbox.append(btnRow);
 
     // --- Status ---
@@ -246,12 +248,67 @@ app.connect('activate', () => {
         });
     });
 
+    // Help dialog
+    helpBtn.connect('clicked', () => {
+        const dlg = new Gtk.Window({
+            title: 'Help — GNOME Window Bounds',
+            transient_for: win,
+            modal: true,
+            default_width: 520,
+            default_height: 420,
+        });
+        const scroll = new Gtk.ScrolledWindow({ vexpand: true });
+        const helpBox = new Gtk.Box({ orientation: Gtk.Orientation.VERTICAL, spacing: 12 });
+        helpBox.set_margin_top(20); helpBox.set_margin_bottom(20);
+        helpBox.set_margin_start(20); helpBox.set_margin_end(20);
+
+        const sections: [string, string][] = [
+            ['What is unsafe_mode?',
+             'GNOME Shell restricts org.gnome.Shell.Eval by default.\n' +
+             'You must enable unsafe_mode once per session before\n' +
+             'this app can move/resize windows.'],
+            ['How to enable (LookingGlass)',
+             '1. Press Alt+F2, type "lg", press Enter\n' +
+             '2. In the LookingGlass prompt, type:\n' +
+             '     global.context.unsafe_mode = true\n' +
+             '3. Close LookingGlass by typing:\n' +
+             '     Main.lookingGlass.close()'],
+            ['Does it persist?',
+             'No. unsafe_mode resets to false every time you log out\n' +
+             'or restart GNOME Shell. You need to re-enable it each\n' +
+             'session.'],
+            ['Verify',
+             'Run in a terminal:\n' +
+             '  gdbus call -e -d org.gnome.Shell \\\n' +
+             '    -o /org/gnome/Shell \\\n' +
+             '    -m org.gnome.Shell.Eval "1+1"\n\n' +
+             'Expected: (true, \'2\')\n' +
+             'If you see (false, \'\'): unsafe_mode is off.'],
+        ];
+
+        for (const [heading, body] of sections) {
+            const h = new Gtk.Label({ label: heading, halign: Gtk.Align.START });
+            h.set_css_classes(['heading']);
+            helpBox.append(h);
+            helpBox.append(new Gtk.Label({
+                label: body,
+                halign: Gtk.Align.START,
+                wrap: true,
+                selectable: true,
+            }));
+        }
+
+        const closeBtn = new Gtk.Button({ label: 'Close', halign: Gtk.Align.END });
+        closeBtn.connect('clicked', () => dlg.close());
+        helpBox.append(closeBtn);
+
+        scroll.set_child(helpBox);
+        dlg.set_child(scroll);
+        dlg.present();
+    });
+
     win.set_child(vbox);
     win.present();
-
-    console.log('--- GNOME Window Bounds ---');
-    console.log('Requires unsafe_mode enabled in gnome-shell (once per session):');
-    console.log('  Alt+F2 → lg → global.context.unsafe_mode = true');
 });
 
 app.run([]);
