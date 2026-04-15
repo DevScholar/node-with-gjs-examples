@@ -74,9 +74,25 @@ class ShellEval {
     }
 }
 
-// ---- JS template executed inside gnome-shell ----
-// Finds the first window whose title contains `title` and calls move_resize_frame.
-function moveResizeCode(title: string, x: number, y: number, w: number, h: number): string {
+// ---- JS templates executed inside gnome-shell ----
+
+// Match by GTK application_id (exact match — most reliable for our own window).
+function moveResizeByAppId(appId: string, x: number, y: number, w: number, h: number): string {
+    return `(function() {
+        var actors = global.get_window_actors();
+        for (var i = 0; i < actors.length; i++) {
+            var win = actors[i].meta_window;
+            if (win.get_gtk_application_id() === ${JSON.stringify(appId)}) {
+                win.move_resize_frame(false, ${x}, ${y}, ${w}, ${h});
+                return 'ok: ' + win.get_title();
+            }
+        }
+        return 'not found (app_id: ${appId})';
+    })()`;
+}
+
+// Match by window title substring (for controlling other windows).
+function moveResizeByTitle(title: string, x: number, y: number, w: number, h: number): string {
     return `(function() {
         var actors = global.get_window_actors();
         for (var i = 0; i < actors.length; i++) {
@@ -95,7 +111,9 @@ function moveResizeCode(title: string, x: number, y: number, w: number, h: numbe
 
 const shell = new ShellEval();
 
-const app = new Gtk.Application({ application_id: 'org.nwg.bounds' });
+const APP_ID = 'org.nwg.bounds';
+
+const app = new Gtk.Application({ application_id: APP_ID });
 
 app.connect('activate', () => {
     // ---- GNOME Shell guard ----
@@ -141,12 +159,31 @@ app.connect('activate', () => {
     vbox.set_margin_start(20);
     vbox.set_margin_end(20);
 
-    // --- Target window title ---
-    const titleRow = new Gtk.Box({ orientation: Gtk.Orientation.HORIZONTAL, spacing: 8 });
-    titleRow.append(new Gtk.Label({ label: 'Target window title:' }));
-    const titleEntry = new Gtk.Entry({ hexpand: true, text: 'GNOME Window Bounds' });
-    titleRow.append(titleEntry);
-    vbox.append(titleRow);
+    // --- Target selector ---
+    const targetRow = new Gtk.Box({ orientation: Gtk.Orientation.HORIZONTAL, spacing: 8 });
+    targetRow.append(new Gtk.Label({ label: 'Target:' }));
+
+    const targetCombo = new Gtk.ComboBoxText();
+    targetCombo.append_text('This window');
+    targetCombo.append_text('By title');
+    targetCombo.set_active(0);
+    targetRow.append(targetCombo);
+
+    const titleEntry = new Gtk.Entry({ hexpand: true, placeholder_text: 'Window title substring', visible: false });
+    targetRow.append(titleEntry);
+    vbox.append(targetRow);
+
+    targetCombo.connect('changed', () => {
+        titleEntry.set_visible(targetCombo.get_active() === 1);
+    });
+
+    // Build the Eval code based on current target mode.
+    const buildMoveCode = (x: number, y: number, w: number, h: number): string => {
+        if (targetCombo.get_active() === 0) {
+            return moveResizeByAppId(APP_ID, x, y, w, h);
+        }
+        return moveResizeByTitle(titleEntry.get_text(), x, y, w, h);
+    };
 
     // --- X Y W H inputs ---
     const grid = new Gtk.Grid({ column_spacing: 8, row_spacing: 8 });
@@ -197,13 +234,12 @@ app.connect('activate', () => {
 
     // Single operation: begin → eval → end
     applyBtn.connect('clicked', () => {
-        const title = titleEntry.get_text();
         const x = xSpin.get_value_as_int();
         const y = ySpin.get_value_as_int();
         const w = wSpin.get_value_as_int();
         const h = hSpin.get_value_as_int();
         try {
-            const r = shell.evalOnce(moveResizeCode(title, x, y, w, h));
+            const r = shell.evalOnce(buildMoveCode(x, y, w, h));
             setStatus(`Apply: ${r}`);
         } catch (e: any) {
             setStatus(`Error: ${e.message}`);
@@ -212,7 +248,6 @@ app.connect('activate', () => {
 
     // Batch operation: unsafe_mode toggled once for all 5 moves
     bounceBtn.connect('clicked', () => {
-        const title = titleEntry.get_text();
         const w = wSpin.get_value_as_int();
         const h = hSpin.get_value_as_int();
 
@@ -238,7 +273,7 @@ app.connect('activate', () => {
             }
             const [x, y] = positions[idx++];
             try {
-                shell.eval(moveResizeCode(title, x, y, w, h));
+                shell.eval(buildMoveCode(x, y, w, h));
             } catch (e: any) {
                 shell.endBatch();
                 setStatus(`Error: ${e.message}`);
