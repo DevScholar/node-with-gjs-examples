@@ -20,18 +20,6 @@
     "typescript": "^5.0.0"
   },
   "scripts": {
-    "build": "tsc",
-    "gtk4-counter": "node start.js src/gtk4/counter/counter.ts",
-    "gtk4-drag-box": "node start.js src/gtk4/drag-box/drag-box.ts",
-    "gtk4-blocking-dialog": "node start.js src/gtk4/blocking-dialog/blocking-dialog.ts",
-    "gtk4-prevent-close": "node start.js src/gtk4/prevent-close/prevent-close.ts",
-    "gtk3-counter": "node start.js src/gtk3/counter/counter.ts",
-    "gtk3-drag-box": "node start.js src/gtk3/drag-box/drag-box.ts",
-    "gtk3-blocking-dialog": "node start.js src/gtk3/blocking-dialog/blocking-dialog.ts",
-    "gtk3-prevent-close": "node start.js src/gtk3/prevent-close/prevent-close.ts",
-    "adwaita-counter": "node start.js src/adwaita/counter/counter.ts",
-    "console-input": "node start.js src/console/console-input/console-input.ts",
-    "await-delay": "node start.js src/console/await-delay/await-delay.ts",
-    "gnome-shell-bounds": "node start.js src/gnome-shell/bounds/bounds.ts"
+    "build": "tsc"
   }
 }
