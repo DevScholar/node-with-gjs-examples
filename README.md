@@ -50,7 +50,14 @@ Node.js 18+ required. Bun and Deno are also supported (see below).
 node start.js <path/to/example.ts>
 ```
 
-Optionally specify a runtime with `--runtime=node|bun|deno` (default: `node`).
+### Running with Bun or Deno
+
+`--runtime` controls which runtime executes the compiled output:
+
+```bash
+bun start.js src/gtk4/counter/counter.ts --runtime=bun
+deno run --allow-all start.js src/gtk4/counter/counter.ts --runtime=deno
+```
 
 ---
 
@@ -133,14 +140,7 @@ node start.js src/gnome-shell/bounds/bounds.ts
 
 ---
 
-## Running with Bun or Deno
 
-`--runtime` controls which runtime executes the compiled output:
-
-```bash
-bun start.js src/gtk4/counter/counter.ts --runtime=bun
-deno run --allow-all start.js src/gtk4/counter/counter.ts --runtime=deno
-```
 
 ---
 
