@@ -4,7 +4,7 @@ export function giPlugin() {
         name: 'gi-plugin',
         setup(build) {
             build.onLoad({ filter: /\.ts$/ }, async (args) => {
-                const fs = await import('fs');
+                const fs = await import('node:fs');
                 let source = fs.readFileSync(args.path, 'utf8');
                 
                 // Transform gi:// imports
